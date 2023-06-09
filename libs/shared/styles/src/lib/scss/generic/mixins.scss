@@ -1,0 +1,26 @@
+// Mixins
+
+@mixin breakpoint-up($name, $breakpoints: $breakpoints) {
+	$min: breakpoint-min($name, $breakpoints);
+
+	@media (min-width: $min) {
+		@content;
+	}
+}
+
+@mixin breakpoint-down($name, $breakpoints: $breakpoints) {
+	$max: breakpoint-max($name, $breakpoints);
+	
+	@media (max-width: $max) {
+		@content;
+	}
+}
+
+@mixin breakpoint-between($lower, $upper, $breakpoints: $breakpoints) {
+	$min: breakpoint-min($lower, $breakpoints);
+	$max: breakpoint-max($upper, $breakpoints);
+
+	@media (min-width: $min) and (max-width: $max) {
+		@content;
+	}
+}

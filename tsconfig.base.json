@@ -14,7 +14,16 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@react-usermanagement/shared/store": ["libs/shared/store/src/index.ts"],
+      "@react-usermanagement/shared/styles": [
+        "libs/shared/styles/src/index.ts"
+      ],
+      "@react-usermanagement/shared/users": ["libs/shared/users/src/index.ts"],
+      "@react-usermanagement/user-list/user-list-page": [
+        "libs/user-list/user-list-page/src/index.ts"
+      ]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }

@@ -1,0 +1,18 @@
+// Base
+body {
+  min-width: 320px;
+  background: #f3f3f3;
+  font-family: $ff-sans-serif;
+  font-weight: $font-weight-base;
+  font-size: $font-size-base;
+  line-height: $line-height-base;
+  color: #000;
+
+  @include breakpoint-down(small-desktop) {
+    font-size: 13px;
+  }
+
+  @include breakpoint-down(mobile) {
+    font-size: 12px;
+  }
+}

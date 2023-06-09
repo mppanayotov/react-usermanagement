@@ -1,10 +1,10 @@
 import { render } from '@testing-library/react';
 
-import App from './app';
+import SharedStyles from './shared-styles';
 
-describe('App', () => {
+describe('SharedStyles', () => {
   it('should render successfully', () => {
-    const { baseElement } = render(<App />);
+    const { baseElement } = render(<SharedStyles />);
     expect(baseElement).toBeTruthy();
   });
 });
