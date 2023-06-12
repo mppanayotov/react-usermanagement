@@ -1,39 +1,36 @@
-import styles from './user-list-user-list-page.module.scss';
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch } from '@react-usermanagement/shared/store';
+import { Delete, Edit, VpnKey } from '@mui/icons-material';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
+  Box,
+  Chip,
+  Fab,
   FormControl,
+  Icon,
+  IconButton,
   Input,
   InputAdornment,
   InputLabel,
-  Fab,
-  IconButton,
+  Paper,
   Switch,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Icon,
-  Button,
+  Tooltip,
 } from '@mui/material';
+import { AppDispatch } from '@react-usermanagement/shared/store';
 import {
+  UsersEntity,
+  fetchUsers,
+  genId,
+  newUserTemplate,
   selectAllUsers,
   usersActions,
-  fetchUsers,
 } from '@react-usermanagement/shared/users';
+import { UserListDialogAddUser } from '@react-usermanagement/user-list/dialog-add-user';
 import {
-  genId,
-  UsersEntity,
-  newUserTemplate,
-} from '@react-usermanagement/shared/users';
+  MaterialReactTable,
+  type MRT_ColumnDef,
+  type MRT_Row,
+} from 'material-react-table';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import styles from './user-list-user-list-page.module.scss';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UserListUserListPageProps {}
@@ -41,52 +38,98 @@ export function UserListUserListPage(props: UserListUserListPageProps) {
   const dispatch = useDispatch<AppDispatch>();
   const users = useSelector(selectAllUsers);
   const [filter, setFilter] = useState('');
-  const [openAddDialog, setOpenAddDialog] = useState(false);
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<UsersEntity | null>(null);
-
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [tableData, setTableData] = useState<UsersEntity[]>([]);
+  const tableRef = useRef<any>(null);
   const handleFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFilter(event.target.value);
+    tableRef.current?.setGlobalFilter(event.target.value);
   };
-
-  const handleStatusChange = (
-    row: UsersEntity,
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const updatedUser: UsersEntity = {
-      ...row,
-      status: event.target.checked ? 'active' : 'disabled',
-    };
-    dispatch(usersActions.update(updatedUser));
-  };
-
-  const handleAddDialogClose = (result: UsersEntity | null) => {
-    setOpenAddDialog(false);
-    if (result) {
-      const newUser = new newUserTemplate(genId(), result);
-      dispatch(usersActions.add(newUser));
-    }
-  };
-
-  const handleDeleteDialogClose = (result: UsersEntity | null) => {
-    setOpenDeleteDialog(false);
-    if (result) {
-      dispatch(usersActions.remove(result.id));
-    }
-  };
-
-  // useEffect(() => {}, []);
 
   useEffect(() => {
     dispatch(fetchUsers());
   }, [dispatch]);
+
+  useMemo(() => {
+    setTableData(users);
+  }, [users]);
+
+  const handleCreateNewRow = (values: UsersEntity) => {
+    tableData.push(values);
+    setTableData([...tableData]);
+  };
+
+  const handleDeleteRow = (row: MRT_Row<UsersEntity>) => {
+    if (!confirm(`Are you sure you want to delete ${row.original.firstName}`)) {
+      return;
+    }
+    dispatch(usersActions.remove(row.original.id));
+  };
+
+  const columns = useMemo<MRT_ColumnDef<UsersEntity>[]>(
+    () => [
+      {
+        accessorFn: (row) => `${row.firstName} ${row.lastName} ${row.email}`,
+        header: 'Username',
+        id: 'username',
+        size: 140,
+        Cell: ({ cell }) => (
+          <span>
+            {cell.row.original.firstName} {cell.row.original.lastName}
+            <br />
+            <small>{cell.row.original.email}</small>
+          </span>
+        ),
+      },
+      {
+        accessorKey: 'role',
+        header: 'Role',
+        size: 140,
+        Cell: ({ cell }) => (
+          <span className={styles['user-list__role']}>
+            <Chip
+              icon={<VpnKey />}
+              color="primary"
+              className={styles['user-list__admin-chip']}
+              sx={{
+                display:
+                  (cell.row.original.role !== 'admin' && 'none') ||
+                  'inline-flex',
+              }}
+            />
+            <span>{cell.row.original.role}</span>
+          </span>
+        ),
+      },
+      {
+        accessorKey: 'status',
+        header: 'Status',
+        size: 140,
+        Cell: ({ cell }) => (
+          <Switch
+            checked={cell.row.getValue('status') === 'active' && true}
+            onChange={(event, checked) => {
+              // handleStatusChange(cell.row.original, checked);
+              const updatedUser: UsersEntity = {
+                ...cell.row.original,
+                status: checked ? 'active' : 'disabled',
+              };
+              dispatch(usersActions.update(updatedUser));
+            }}
+            inputProps={{ role: 'switch' }}
+          />
+        ),
+      },
+    ],
+    [dispatch]
+  );
 
   return (
     <div className={styles['user-list']}>
       <Paper elevation={8} square>
         <div className="shell">
           <div className={styles['user-list__head']}>
-            <Fab color="primary" onClick={() => setOpenAddDialog(true)}>
+            <Fab color="primary" onClick={() => setCreateModalOpen(true)}>
               <Icon>add</Icon>
             </Fab>
             <h2>Project Access</h2>
@@ -97,7 +140,7 @@ export function UserListUserListPage(props: UserListUserListPageProps) {
                 onChange={handleFilterChange}
                 placeholder="Ex. Mia"
                 endAdornment={
-                  <InputAdornment position="end">
+                  <InputAdornment sx={{ pointerEvents: 'none' }} position="end">
                     <Icon>search</Icon>
                   </InputAdornment>
                 }
@@ -108,124 +151,66 @@ export function UserListUserListPage(props: UserListUserListPageProps) {
       </Paper>
       <div className={styles['user-list__body']}>
         <div className="shell">
-          <TableContainer>
-            <Table
-              className={styles['user-list__table']}
-              aria-label="User list"
-            >
-              <TableHead>
-                <TableRow>
-                  <TableCell>User</TableCell>
-                  <TableCell>Role</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {users
-                  .filter((row) =>
-                    row.firstName.toLowerCase().includes(filter.toLowerCase())
-                  )
-                  .map((row) => (
-                    <TableRow key={row.id}>
-                      <TableCell
-                        className={styles['user-list__user']}
-                        style={{ opacity: row.status === 'disabled' ? 0.5 : 1 }}
-                      >
-                        {row.firstName} {row.lastName}
-                        <br />
-                        <span className="user__email">{row.email}</span>
-                        <div className={styles['user-list__avatar']}>
-                          <Icon>account_circle</Icon>
-                        </div>
-                      </TableCell>
-                      <TableCell
-                        className={styles['user-list__role']}
-                        style={{ opacity: row.status === 'disabled' ? 0.5 : 1 }}
-                      >
-                        {row.role}
-                        {row.role === 'admin' && (
-                          <Icon className={styles['user-list__admin-chip']}>
-                            vpn_key
-                          </Icon>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Switch
-                          checked={row.status === 'active'}
-                          onChange={(event) => handleStatusChange(row, event)}
-                          color="primary"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <IconButton
-                          color="primary"
-                          disabled={row.status === 'disabled'}
-                          onClick={() => setOpenAddDialog(true)}
-                          style={{ opacity: row.status === 'disabled' ? 0 : 1 }}
-                        >
-                          <Icon>settings</Icon>
-                        </IconButton>
-                        <IconButton
-                          color="warning"
-                          onClick={() => setOpenDeleteDialog(true)}
-                        >
-                          <Icon>delete</Icon>
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-          <Dialog
-            open={openAddDialog}
-            onClose={() => handleAddDialogClose(null)}
-          >
-            <DialogTitle>Add User Dialog</DialogTitle>
-            <DialogContent>{/* Add user form or content */}</DialogContent>
-            <DialogActions>
-              <Button
-                variant="contained"
-                onClick={() => handleAddDialogClose(null)}
-                color="primary"
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="contained"
-                onClick={() => handleAddDialogClose(null)}
-                color="primary"
-              >
-                Add
-              </Button>
-            </DialogActions>
-          </Dialog>
-          <Dialog
-            open={openDeleteDialog}
-            onClose={() => handleDeleteDialogClose(null)}
-          >
-            <DialogTitle>Delete User Dialog</DialogTitle>
-            <DialogContent>
-              {/* Delete user confirmation message */}
-            </DialogContent>
-            <DialogActions>
-              <Button
-                variant="contained"
-                onClick={() => handleDeleteDialogClose(null)}
-                color="primary"
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="contained"
-                onClick={() => handleDeleteDialogClose(null)}
-                color="secondary"
-              >
-                Delete
-              </Button>
-            </DialogActions>
-          </Dialog>
+          <MaterialReactTable
+            displayColumnDefOptions={{
+              'mrt-row-actions': {
+                size: 120,
+              },
+            }}
+            columns={columns}
+            data={tableData}
+            enableEditing
+            muiTableBodyRowProps={{
+              sx: {
+                backgroundColor: 'none',
+              },
+            }}
+            muiTablePaperProps={{
+              elevation: 0,
+              sx: {
+                background: 'none',
+              },
+            }}
+            muiTableHeadRowProps={{
+              sx: {
+                background: 'none',
+                boxShadow: 'none',
+              },
+            }}
+            muiBottomToolbarProps={{
+              sx: {
+                background: 'none',
+              },
+            }}
+            editingMode="modal"
+            enableColumnActions={false}
+            tableInstanceRef={tableRef}
+            enableFilterMatchHighlighting={false}
+            enableTopToolbar={false}
+            renderRowActions={({ row, table }) => (
+              <Box sx={{ display: 'flex', gap: '1rem' }}>
+                <Tooltip arrow placement="left" title="Edit">
+                  <IconButton onClick={() => console.log(row.original)}>
+                    <Edit />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip arrow placement="right" title="Delete">
+                  <IconButton
+                    color="error"
+                    onClick={() => handleDeleteRow(row)}
+                  >
+                    <Delete />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            )}
+            positionActionsColumn="last"
+          />
+          <UserListDialogAddUser
+            open={createModalOpen}
+            onClose={() => setCreateModalOpen(false)}
+            onSubmit={handleCreateNewRow}
+          />
         </div>
       </div>
     </div>

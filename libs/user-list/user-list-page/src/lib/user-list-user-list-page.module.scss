@@ -19,10 +19,6 @@
     right: 0;
     bottom: 34px;
   }
-  .user-list__table,
-  .user-list__paginator {
-    background: none;
-  }
   .user-list__head {
     position: relative;
     display: flex;
@@ -39,38 +35,21 @@
   }
   .user-list__role {
     position: relative;
-    overflow: visible;
   }
   .user-list__admin-chip {
-    position: absolute;
-    right: 100%;
-    top: 50%;
-    transform: translateY(-50%);
+    min-width: 46px;
   }
-  .user-list__admin-chip:not(.mat-mdc-chip-highlighted) {
-    background: none;
+
+  .user-list__admin-chip svg {
+    margin: 0;
   }
-  .user-list__no-data {
-    height: 52px;
+
+  .user-list__admin-chip span {
+    display: none;
   }
-  .user-list__user {
-    position: relative;
-    overflow: visible;
-  }
-  .user-list__avatar {
-    position: absolute;
-    right: 100%;
-    top: 50%;
-    margin-right: 20px;
-    transform: translateY(-50%);
-  }
-  .user-list__avatar mat-icon {
-    width: 48px;
-    height: 48px;
-    font-size: 48px;
-    color: #666;
-  }
-  .user__email {
-    font-weight: 200;
+
+  .user-list__admin-chip + span {
+    margin-left: 20px;
+    text-transform: capitalize;
   }
 }
