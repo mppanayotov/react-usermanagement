@@ -1,6 +1,5 @@
 import { UsersEntity } from '@react-usermanagement/shared/users';
 import { useState } from 'react';
-import styles from './user-list-dialog-add-user.module.scss';
 import {
   Dialog,
   DialogTitle,
@@ -12,28 +11,27 @@ import {
 } from '@mui/material';
 
 export interface UserListDialogAddUserProps {
-  onClose: () => void;
-  onSubmit: (values: UsersEntity) => void;
+  onClose: (newUser?: UsersEntity) => void;
   open: boolean;
 }
 
 export function UserListDialogAddUser({
   open,
   onClose,
-  onSubmit,
 }: UserListDialogAddUserProps) {
-  const [values, setValues] = useState<any>();
+  const [newUser, setNewUser] = useState<any>();
 
   const handleSubmit = () => {
-    //put your validation logic here
-    onSubmit(values);
+    onClose(newUser);
+  };
+  const handleClose = () => {
     onClose();
   };
   return (
-    <Dialog open={open}>
-      <DialogTitle textAlign="center">Create New Account</DialogTitle>
+    <Dialog open={open} onClose={handleClose}>
+      <DialogTitle textAlign="center">Add User</DialogTitle>
       <DialogContent sx={{ overflow: 'visible' }}>
-        <form onSubmit={(e) => e.preventDefault()}>
+        <form onSubmit={handleSubmit}>
           <Stack
             sx={{
               width: '100%',
@@ -46,7 +44,7 @@ export function UserListDialogAddUser({
               label={'First Name'}
               name={'firstName'}
               onChange={(e) =>
-                setValues({ ...values, [e.target.name]: e.target.value })
+                setNewUser({ ...newUser, [e.target.name]: e.target.value })
               }
             />
             <TextField
@@ -54,7 +52,7 @@ export function UserListDialogAddUser({
               label={'Last Name'}
               name={'lastName'}
               onChange={(e) =>
-                setValues({ ...values, [e.target.name]: e.target.value })
+                setNewUser({ ...newUser, [e.target.name]: e.target.value })
               }
             />
             <TextField
@@ -62,7 +60,7 @@ export function UserListDialogAddUser({
               label={'Email'}
               name={'email'}
               onChange={(e) =>
-                setValues({ ...values, [e.target.name]: e.target.value })
+                setNewUser({ ...newUser, [e.target.name]: e.target.value })
               }
             />
             <TextField
@@ -70,14 +68,14 @@ export function UserListDialogAddUser({
               label={'Role'}
               name={'role'}
               onChange={(e) =>
-                setValues({ ...values, [e.target.name]: e.target.value })
+                setNewUser({ ...newUser, [e.target.name]: e.target.value })
               }
             />
           </Stack>
         </form>
       </DialogContent>
-      <DialogActions sx={{ p: '1.25rem' }}>
-        <Button onClick={onClose}>Cancel</Button>
+      <DialogActions sx={{ p: '1.25rem', justifyContent: 'space-between' }}>
+        <Button onClick={handleClose}>Cancel</Button>
         <Button color="secondary" onClick={handleSubmit} variant="contained">
           Create New Account
         </Button>

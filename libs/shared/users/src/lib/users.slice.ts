@@ -196,9 +196,3 @@ export const selectUsersEntities = createSelector(
   getUsersState,
   selectEntities
 );
-
-export const genId = (): number => {
-  return selectAllUsers.length > 0
-    ? Math.max(...selectAllUsers.lastResult().map((user) => user.id)) + 1
-    : 1;
-};

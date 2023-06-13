@@ -13,6 +13,10 @@
   table td {
     padding-top: 20px;
     padding-bottom: 20px;
+    overflow: visible;
+  }
+  table td:first-child {
+    padding-right: 78px;
   }
   .user-list__search {
     position: absolute;
@@ -37,19 +41,31 @@
     position: relative;
   }
   .user-list__admin-chip {
+    position: absolute;
+    right: 100%;
+    margin-right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
     min-width: 46px;
   }
-
   .user-list__admin-chip svg {
     margin: 0;
   }
-
   .user-list__admin-chip span {
     display: none;
   }
-
   .user-list__admin-chip + span {
-    margin-left: 20px;
     text-transform: capitalize;
+  }
+  .user-list__user {
+    position: relative;
+  }
+  .user-list__user svg {
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    margin-right: 32px;
+    transform: translateY(-50%);
+    font-size: 48px;
   }
 }

@@ -2,7 +2,6 @@ import { store } from '@react-usermanagement/shared/store';
 import { UserListUserListPage } from '@react-usermanagement/user-list/user-list-page';
 import { Provider } from 'react-redux';
 import { Route, Routes } from 'react-router-dom';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import styles from './app.module.scss';
 
 export function App() {

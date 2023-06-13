@@ -1,4 +1,4 @@
-import { Delete, Edit, VpnKey } from '@mui/icons-material';
+import { AccountCircle, Add, Delete, Edit, VpnKey } from '@mui/icons-material';
 import {
   Box,
   Chip,
@@ -17,20 +17,16 @@ import { AppDispatch } from '@react-usermanagement/shared/store';
 import {
   UsersEntity,
   fetchUsers,
-  genId,
   newUserTemplate,
   selectAllUsers,
   usersActions,
 } from '@react-usermanagement/shared/users';
 import { UserListDialogAddUser } from '@react-usermanagement/user-list/dialog-add-user';
-import {
-  MaterialReactTable,
-  type MRT_ColumnDef,
-  type MRT_Row,
-} from 'material-react-table';
+import { MaterialReactTable, type MRT_ColumnDef } from 'material-react-table';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styles from './user-list-user-list-page.module.scss';
+import { UserListDialogDeleteUser } from '@react-usermanagement/user-list/dialog-delete-user';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UserListUserListPageProps {}
@@ -38,7 +34,11 @@ export function UserListUserListPage(props: UserListUserListPageProps) {
   const dispatch = useDispatch<AppDispatch>();
   const users = useSelector(selectAllUsers);
   const [filter, setFilter] = useState('');
-  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteUser, setDeleteUser] = useState<UsersEntity | undefined>(
+    undefined
+  );
   const [tableData, setTableData] = useState<UsersEntity[]>([]);
   const tableRef = useRef<any>(null);
   const handleFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -54,16 +54,26 @@ export function UserListUserListPage(props: UserListUserListPageProps) {
     setTableData(users);
   }, [users]);
 
-  const handleCreateNewRow = (values: UsersEntity) => {
-    tableData.push(values);
-    setTableData([...tableData]);
+  const genId = (): number => {
+    return users.length > 0 ? Math.max(...users.map((user) => user.id)) + 1 : 1;
   };
 
-  const handleDeleteRow = (row: MRT_Row<UsersEntity>) => {
-    if (!confirm(`Are you sure you want to delete ${row.original.firstName}`)) {
-      return;
+  const handleOpenDeleteDialog = (deleteUser: UsersEntity) => {
+    setDeleteUser(deleteUser);
+    setDeleteModalOpen(true);
+  };
+
+  const handleCloseDeleteDialog = (result: UsersEntity | undefined) => {
+    setDeleteModalOpen(false);
+    result && dispatch(usersActions.remove(result.id));
+  };
+
+  const handleCloseAddDialog = (result: UsersEntity | undefined) => {
+    setAddModalOpen(false);
+    if (result) {
+      const newUser = new newUserTemplate(genId(), result);
+      dispatch(usersActions.add(newUser));
     }
-    dispatch(usersActions.remove(row.original.id));
   };
 
   const columns = useMemo<MRT_ColumnDef<UsersEntity>[]>(
@@ -74,7 +84,8 @@ export function UserListUserListPage(props: UserListUserListPageProps) {
         id: 'username',
         size: 140,
         Cell: ({ cell }) => (
-          <span>
+          <span className={styles['user-list__user']}>
+            <AccountCircle color="action" />
             {cell.row.original.firstName} {cell.row.original.lastName}
             <br />
             <small>{cell.row.original.email}</small>
@@ -109,7 +120,6 @@ export function UserListUserListPage(props: UserListUserListPageProps) {
           <Switch
             checked={cell.row.getValue('status') === 'active' && true}
             onChange={(event, checked) => {
-              // handleStatusChange(cell.row.original, checked);
               const updatedUser: UsersEntity = {
                 ...cell.row.original,
                 status: checked ? 'active' : 'disabled',
@@ -129,8 +139,8 @@ export function UserListUserListPage(props: UserListUserListPageProps) {
       <Paper elevation={8} square>
         <div className="shell">
           <div className={styles['user-list__head']}>
-            <Fab color="primary" onClick={() => setCreateModalOpen(true)}>
-              <Icon>add</Icon>
+            <Fab color="primary" onClick={() => setAddModalOpen(true)}>
+              <Add />
             </Fab>
             <h2>Project Access</h2>
             <FormControl className={styles['user-list__search']}>
@@ -180,6 +190,7 @@ export function UserListUserListPage(props: UserListUserListPageProps) {
             muiBottomToolbarProps={{
               sx: {
                 background: 'none',
+                boxShadow: 'none',
               },
             }}
             editingMode="modal"
@@ -197,7 +208,7 @@ export function UserListUserListPage(props: UserListUserListPageProps) {
                 <Tooltip arrow placement="right" title="Delete">
                   <IconButton
                     color="error"
-                    onClick={() => handleDeleteRow(row)}
+                    onClick={() => handleOpenDeleteDialog(row.original)}
                   >
                     <Delete />
                   </IconButton>
@@ -207,9 +218,13 @@ export function UserListUserListPage(props: UserListUserListPageProps) {
             positionActionsColumn="last"
           />
           <UserListDialogAddUser
-            open={createModalOpen}
-            onClose={() => setCreateModalOpen(false)}
-            onSubmit={handleCreateNewRow}
+            open={addModalOpen}
+            onClose={(result) => handleCloseAddDialog(result)}
+          />
+          <UserListDialogDeleteUser
+            open={deleteModalOpen}
+            onClose={(result) => handleCloseDeleteDialog(result)}
+            deleteUser={deleteUser}
           />
         </div>
       </div>
