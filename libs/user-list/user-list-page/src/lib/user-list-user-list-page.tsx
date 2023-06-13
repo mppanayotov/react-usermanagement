@@ -80,7 +80,7 @@ export function UserListUserListPage(props: UserListUserListPageProps) {
     () => [
       {
         accessorFn: (row) => `${row.firstName} ${row.lastName} ${row.email}`,
-        header: 'Username',
+        header: 'User',
         id: 'username',
         size: 140,
         Cell: ({ cell }) => (
@@ -193,6 +193,7 @@ export function UserListUserListPage(props: UserListUserListPageProps) {
                 boxShadow: 'none',
               },
             }}
+            initialState={{ pagination: { pageIndex: 0, pageSize: 5 } }}
             editingMode="modal"
             enableColumnActions={false}
             tableInstanceRef={tableRef}

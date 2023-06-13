@@ -3,6 +3,8 @@
     margin: 0;
     font-size: 36px;
     line-height: 1.333;
+    font-weight: 500;
+    letter-spacing: 0.0125em;
   }
   table {
     width: 100%;
@@ -21,7 +23,7 @@
   .user-list__search {
     position: absolute;
     right: 0;
-    bottom: 34px;
+    bottom: 56px;
   }
   .user-list__head {
     position: relative;
