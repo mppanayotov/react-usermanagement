@@ -84,7 +84,13 @@ export function UserListUserListPage(props: UserListUserListPageProps) {
         id: 'username',
         size: 140,
         Cell: ({ cell }) => (
-          <span className={styles['user-list__user']}>
+          <span
+            className={styles['user-list__user']}
+            style={{
+              opacity: cell.row.getValue('status') === 'active' ? '1' : '0.5',
+              transition: 'opacity .15s ease-in-out',
+            }}
+          >
             <AccountCircle color="action" />
             {cell.row.original.firstName} {cell.row.original.lastName}
             <br />
@@ -97,10 +103,18 @@ export function UserListUserListPage(props: UserListUserListPageProps) {
         header: 'Role',
         size: 140,
         Cell: ({ cell }) => (
-          <span className={styles['user-list__role']}>
+          <span
+            className={styles['user-list__role']}
+            style={{
+              opacity: cell.row.getValue('status') === 'active' ? '1' : '0.5',
+              transition: 'opacity .15s ease-in-out',
+            }}
+          >
             <Chip
               icon={<VpnKey />}
-              color="primary"
+              color={
+                cell.row.getValue('status') === 'active' ? 'primary' : 'default'
+              }
               className={styles['user-list__admin-chip']}
               sx={{
                 display:
@@ -187,6 +201,11 @@ export function UserListUserListPage(props: UserListUserListPageProps) {
                 boxShadow: 'none',
               },
             }}
+            muiTableHeadCellProps={{
+              sx: {
+                borderBottomWidth: '2px',
+              },
+            }}
             muiBottomToolbarProps={{
               sx: {
                 background: 'none',
@@ -201,7 +220,20 @@ export function UserListUserListPage(props: UserListUserListPageProps) {
             enableTopToolbar={false}
             renderRowActions={({ row, table }) => (
               <Box sx={{ display: 'flex', gap: '1rem' }}>
-                <Tooltip arrow placement="left" title="Edit">
+                <Tooltip
+                  arrow
+                  placement="left"
+                  title="Edit"
+                  disableFocusListener={
+                    row.getValue('status') === 'disabled' && true
+                  }
+                  sx={{
+                    opacity: row.getValue('status') === 'active' ? '1' : '0',
+                    pointerEvents:
+                      row.getValue('status') === 'active' ? 'default' : 'none',
+                    transition: 'opacity .15s ease-in-out',
+                  }}
+                >
                   <IconButton onClick={() => console.log(row.original)}>
                     <Edit />
                   </IconButton>
