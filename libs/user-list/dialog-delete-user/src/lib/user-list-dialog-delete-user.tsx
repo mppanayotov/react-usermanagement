@@ -50,7 +50,7 @@ export function UserListDialogDeleteUser({
       <DialogActions sx={{ p: '1.25rem', justifyContent: 'space-between' }}>
         <Button onClick={handleClose}>Cancel</Button>
         <Button color="error" onClick={handleDelete} variant="contained">
-          Delete user
+          Delete
         </Button>
       </DialogActions>
     </Dialog>
