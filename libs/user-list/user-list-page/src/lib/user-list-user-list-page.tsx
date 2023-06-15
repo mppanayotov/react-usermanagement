@@ -184,6 +184,7 @@ export function UserListUserListPage(props: UserListUserListPageProps) {
             columns={columns}
             data={tableData}
             enableEditing
+            autoResetPageIndex={false}
             muiTableBodyRowProps={{
               sx: {
                 backgroundColor: 'none',
