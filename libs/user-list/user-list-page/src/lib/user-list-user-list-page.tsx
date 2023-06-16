@@ -68,7 +68,16 @@ export function UserListUserListPage(props: UserListUserListPageProps) {
     result && dispatch(usersActions.remove(result.id));
   };
 
-  const handleCloseAddDialog = (result: UsersEntity | undefined) => {
+  const handleCloseAddDialog = (
+    result:
+      | {
+          firstName: string;
+          lastName: string;
+          email: string;
+          role: string;
+        }
+      | undefined
+  ) => {
     setAddModalOpen(false);
     if (result) {
       const newUser = new newUserTemplate(genId(), result);
